@@ -4,36 +4,36 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
 
-import org.glassfish.jersey.servlet.internal.spi.ServletContainerProvider;
-
+import org.flywaydb.core.Flyway;
 import dto.MusicListResponse;
 
-public class Dao implements ServletContextListener{
-	// create table ENTRIES ( ID INTEGER PRIMARY KEY,LINK VARCHAR(200), NAME TEXT CHARACTER SET utf8 COLLATE utf8_unicode_ci, OWNER VARCHAR(50), DOWNLOAD_STATUS TINYINT(1), DOWNLOAD_STARTED TIMESTAMP, DOWNLOAD_COMPLETED TIMESTAMP, PATH TEXT CHARACTER SET utf8 COLLATE utf8_unicode_ci);
-	// ALTER TABLE ENTRIES MODIFY COLUMN ID INTEGER AUTO_INCREMENT;
-	// ALTER TABLE ENTRIES ADD CONSTRAINT constraint1 UNIQUE(LINK)
-
-//	public void contextInitialialized(ServletContextEvent arg0){
-//		
-//	};
-//	
-//	public void contextDServletContextListenerestroyed(ServletContextEvent arg0){
-//		
-//	}
+public class Dao {
+	
+	private static Flyway flyway;
+	
+	static{
+		flyway = new Flyway();
+		flyway.setDataSource("jdbc:mysql://localhost:3306/pi_database", "user", "user");
+		try{
+		flyway.migrate();
+		}
+		catch(Exception e){
+			System.out.println(e.toString());
+			e.printStackTrace();
+		}
+	}
 	public Dao() {
 		setupConnection();
+		System.out.println("hello");
 	}
 
-	private Connection con;
+	private  Connection con;
 
-	public void setupConnection() {
+	public  void setupConnection() {
 		try {
 			Class.forName("com.mysql.jdbc.Driver");
 		} catch (ClassNotFoundException e) {
