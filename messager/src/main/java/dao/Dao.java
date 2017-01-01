@@ -27,7 +27,7 @@ public class Dao {
 		}
 	}
 	public Dao() {
-		setupConnection();
+//		setupConnection();
 		System.out.println("hello");
 	}
 
@@ -49,9 +49,18 @@ public class Dao {
 
 	}
 
+	public void closeConnection(){
+		try {
+			con.close();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 	public void createNewEntry(String name, String owner, boolean downloadStatus, long downloadStarted,
 			long downloadCompleted, String path, String link) {
 		try {
+			setupConnection();
 			Timestamp start = new Timestamp(downloadStarted);
 			Timestamp completed = new Timestamp(downloadCompleted);
 			PreparedStatement ps = con.prepareStatement(
@@ -65,6 +74,7 @@ public class Dao {
 			ps.setString(7, link);
 			int result = ps.executeUpdate();
 			System.out.println("entries update with " + result + " rows");
+			closeConnection();
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			System.out.println("Sql Exception caught: " + e.toString());
@@ -75,10 +85,11 @@ public class Dao {
 	public ArrayList<MusicListResponse> getNewEntries(long time, String owner) {
 		ArrayList<MusicListResponse> response = new ArrayList<>();
 		try {
+			setupConnection();
 			PreparedStatement ps = con.prepareStatement(
-					"SELECT ID, NAME FROM ENTRIES WHERE OWNER = ? AND DOWNLOAD_STATUS = 1 AND DOWNLOAD_COMPLETED >= ? ");
+					"SELECT ID, NAME FROM ENTRIES WHERE OWNER = ? AND DOWNLOAD_STATUS = 1 AND UNIX_TIMESTAMP(DOWNLOAD_COMPLETED) >= ? ");
 			ps.setString(1, owner);
-			ps.setLong(2, time);
+			ps.setLong(2, time/1000);
 			ResultSet rs = ps.executeQuery();
 			while (rs.next()) {
 				MusicListResponse unitResponse = new MusicListResponse();
@@ -86,6 +97,7 @@ public class Dao {
 				unitResponse.setName(rs.getString("NAME"));
 				response.add(unitResponse);
 			}
+			closeConnection();
 		} catch (SQLException e) {
 			System.out.println(e.toString());
 		}
@@ -118,6 +130,7 @@ public class Dao {
 		}
 		String path = null;
 		try{
+			setupConnection();
 			PreparedStatement ps = con.prepareStatement("SELECT PATH FROM ENTRIES WHERE ID = ? AND DOWNLOAD_STATUS = 1");
 			ps.setInt(1, id);
 			ResultSet rs = ps.executeQuery();
@@ -125,6 +138,7 @@ public class Dao {
 			while(rs.next()){
 				path = rs.getString("PATH");
 			}
+			closeConnection();
 		}
 		catch(SQLException e){
 			System.out.println(e.toString());
@@ -139,6 +153,7 @@ public class Dao {
 		}
 		String path = null;
 		try{
+			setupConnection();
 			PreparedStatement ps = con.prepareStatement("SELECT NAME FROM ENTRIES WHERE ID = ? AND DOWNLOAD_STATUS = 1");
 			ps.setInt(1, id);
 			ResultSet rs = ps.executeQuery();
@@ -146,6 +161,7 @@ public class Dao {
 			while(rs.next()){
 				path = rs.getString("NAME");
 			}
+			closeConnection();
 		}
 		catch(SQLException e){
 			System.out.println(e.toString());
